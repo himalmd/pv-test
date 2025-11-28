@@ -139,16 +139,8 @@ INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('004_create_comments_tabl
 -- Migration 005: Snapshot Dimensions and Media Reference
 -- ============================================================================
 
--- Add dimension columns if they don't exist (idempotent check via procedure)
-SET @column_exists = (
-    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'snapshots'
-    AND COLUMN_NAME = 'width_px'
-);
-
--- Only add columns if they don't exist (for idempotency)
--- Note: In production, use a migration tool that tracks state properly
+-- Add columns if they don't exist (for idempotency)
+-- Note: ADD COLUMN IF NOT EXISTS requires MySQL 8.0.19+
 ALTER TABLE `snapshots`
     ADD COLUMN IF NOT EXISTS `width_px` INT UNSIGNED NULL AFTER `version`,
     ADD COLUMN IF NOT EXISTS `height_px` INT UNSIGNED NULL AFTER `width_px`,
