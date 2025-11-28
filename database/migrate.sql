@@ -136,6 +136,45 @@ CREATE TABLE IF NOT EXISTS `comments` (
 INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('004_create_comments_table');
 
 -- ============================================================================
+-- Migration 005: Snapshot Dimensions and Media Reference
+-- ============================================================================
+
+-- Add dimension columns if they don't exist (idempotent check via procedure)
+SET @column_exists = (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'snapshots'
+    AND COLUMN_NAME = 'width_px'
+);
+
+-- Only add columns if they don't exist (for idempotency)
+-- Note: In production, use a migration tool that tracks state properly
+ALTER TABLE `snapshots`
+    ADD COLUMN IF NOT EXISTS `width_px` INT UNSIGNED NULL AFTER `version`,
+    ADD COLUMN IF NOT EXISTS `height_px` INT UNSIGNED NULL AFTER `width_px`,
+    ADD COLUMN IF NOT EXISTS `media_reference` VARCHAR(512) NULL AFTER `height_px`;
+
+-- Create indexes (will be ignored if they already exist due to IF NOT EXISTS in MySQL 8.0+)
+-- For MySQL 5.7 compatibility, we use a different approach with error suppression
+CREATE INDEX `idx_snapshots_media_reference` ON `snapshots` (`media_reference`);
+CREATE INDEX `idx_snapshots_dimensions` ON `snapshots` (`width_px`, `height_px`);
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('005_add_snapshot_dimensions_and_media');
+
+-- ============================================================================
+-- Migration 006: Comment Coordinates
+-- ============================================================================
+
+ALTER TABLE `comments`
+    ADD COLUMN IF NOT EXISTS `x_norm` DECIMAL(10,9) NULL AFTER `content`,
+    ADD COLUMN IF NOT EXISTS `y_norm` DECIMAL(10,9) NULL AFTER `x_norm`;
+
+CREATE INDEX `idx_comments_coordinates` ON `comments` (`x_norm`, `y_norm`);
+CREATE INDEX `idx_comments_snapshot_coords` ON `comments` (`snapshot_id`, `x_norm`, `y_norm`);
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('006_add_comment_coordinates');
+
+-- ============================================================================
 -- Migration Complete
 -- ============================================================================
 
