@@ -2,7 +2,7 @@
 -- Migration: 004_create_comments_table
 -- Description: Creates the comments table - each comment references a snapshot
 -- Dependencies: 003_create_snapshots_table
--- Note: Normalised coordinate fields (x_norm, y_norm) will be added in migration 006
+-- Note: Normalised coordinate fields (x_norm, y_norm) will be added in a subsequent migration
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------

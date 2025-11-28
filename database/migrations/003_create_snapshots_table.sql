@@ -2,7 +2,7 @@
 -- Migration: 003_create_snapshots_table
 -- Description: Creates the snapshots table - each snapshot belongs to a page
 -- Dependencies: 002_create_pages_table
--- Note: Width, height, and media reference fields will be added in migration 005
+-- Note: Width, height, and media reference fields will be added in a subsequent migration
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
