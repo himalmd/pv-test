@@ -16,6 +16,18 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Drop tables in reverse dependency order
 -- ============================================================================
 
+-- Drop cleanup indexes (migration 010)
+DROP INDEX IF EXISTS `idx_inboxes_status_updated` ON `inboxes`;
+
+-- Drop messages table (depends on inboxes)
+DROP TABLE IF EXISTS `messages`;
+
+-- Drop inbox_address_cooldowns table (independent)
+DROP TABLE IF EXISTS `inbox_address_cooldowns`;
+
+-- Drop inboxes table (root entity for temp inbox)
+DROP TABLE IF EXISTS `inboxes`;
+
 -- Drop comments table (depends on snapshots)
 DROP TABLE IF EXISTS `comments`;
 

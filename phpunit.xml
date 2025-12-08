@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+         beStrictAboutOutputDuringTests="true"
+         failOnRisky="true"
+         failOnWarning="true">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <exclude>
+            <directory>src/Entity</directory>
+        </exclude>
+    </source>
+    <php>
+        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_NAME" value="snaply_test"/>
+        <env name="DB_USER" value="test_user"/>
+        <env name="DB_PASS" value="test_password"/>
+        <env name="INBOX_DOMAIN" value="test.example.com"/>
+        <env name="INBOX_TTL_MINUTES" value="60"/>
+        <env name="INBOX_COOLDOWN_HOURS" value="24"/>
+        <env name="INBOX_ADDRESS_LENGTH" value="10"/>
+        <env name="INBOX_MAX_RETRY_ATTEMPTS" value="10"/>
+    </php>
+</phpunit>
