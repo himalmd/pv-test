@@ -194,6 +194,50 @@ All errors follow this format:
 - `NOT_FOUND` (404): Resource not found
 - `INTERNAL_ERROR` (500): Unexpected server error
 
+## Cleanup & Maintenance
+
+### Scheduled Cleanup
+
+The system includes automated cleanup mechanisms for expired inboxes and messages. The cleanup script should be run periodically via cron.
+
+#### Running Cleanup Manually
+
+```bash
+# Standard cleanup
+php bin/cleanup-inboxes.php
+
+# Dry run (see what would be deleted without actually deleting)
+php bin/cleanup-inboxes.php --dry-run
+
+# Verbose output with detailed progress
+php bin/cleanup-inboxes.php --verbose
+
+# Combine options
+php bin/cleanup-inboxes.php --dry-run --verbose
+```
+
+#### Cron Setup
+
+Add to your crontab to run cleanup automatically:
+
+```bash
+# Run cleanup every 5 minutes
+*/5 * * * * cd /var/www/snaply && php bin/cleanup-inboxes.php >> /var/log/snaply-cleanup.log 2>&1
+
+# Run verbose cleanup every hour (for monitoring)
+0 * * * * cd /var/www/snaply && php bin/cleanup-inboxes.php --verbose >> /var/log/snaply-cleanup.log 2>&1
+```
+
+#### Cleanup Process
+
+The cleanup script performs three phases:
+
+1. **Mark Expired Inboxes**: Finds active inboxes that have exceeded their TTL and marks them as expired
+2. **Hard Delete Old Inboxes**: Permanently removes expired/abandoned inboxes older than the configured age threshold (messages are cascade-deleted by database)
+3. **Clean Up Cooldowns**: Removes expired address cooldown records to make addresses available for reuse
+
+All operations use batched processing with configurable limits to ensure efficiency under high load.
+
 ## Configuration
 
 All configuration is via environment variables (see `.env.example`):
@@ -216,6 +260,13 @@ All configuration is via environment variables (see `.env.example`):
 - `SESSION_COOKIE_LIFETIME`: Cookie lifetime in seconds (default: 2592000 = 30 days)
 - `SESSION_COOKIE_SECURE`: HTTPS-only flag (default: true)
 - `SESSION_COOKIE_DOMAIN`: Cookie domain (default: current domain)
+
+### Cleanup
+- `CLEANUP_INBOX_AGE_MINUTES`: Age threshold before hard deletion (default: 60)
+- `CLEANUP_BATCH_SIZE`: Records to process per batch (default: 1000)
+- `CLEANUP_MAX_RUNTIME_SECONDS`: Maximum cleanup execution time (default: 300)
+- `CLEANUP_VERBOSE`: Enable verbose logging (default: false)
+- `CLEANUP_DRY_RUN`: Dry run mode - no actual deletion (default: false)
 
 ## Security Features
 
