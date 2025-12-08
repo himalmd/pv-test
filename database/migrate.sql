@@ -167,6 +167,90 @@ CREATE INDEX `idx_comments_snapshot_coords` ON `comments` (`snapshot_id`, `x_nor
 INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('006_add_comment_coordinates');
 
 -- ============================================================================
+-- Migration 007: Inboxes Table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `inboxes` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `session_token_hash` VARCHAR(64) NOT NULL,
+    `email_local_part` VARCHAR(64) NOT NULL,
+    `email_domain` VARCHAR(255) NOT NULL,
+    `status` ENUM('active', 'abandoned', 'expired', 'deleted') NOT NULL DEFAULT 'active',
+    `ttl_minutes` INT UNSIGNED NOT NULL DEFAULT 60,
+    `last_accessed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `expired_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `idx_inboxes_session_token` (`session_token_hash`),
+    UNIQUE INDEX `idx_inboxes_email` (`email_local_part`, `email_domain`),
+    INDEX `idx_inboxes_status` (`status`),
+    INDEX `idx_inboxes_deleted_at` (`deleted_at`),
+    INDEX `idx_inboxes_last_accessed` (`last_accessed_at`),
+    INDEX `idx_inboxes_expired_at` (`expired_at`),
+    INDEX `idx_inboxes_status_accessed` (`status`, `last_accessed_at`),
+    INDEX `idx_inboxes_status_expired` (`status`, `expired_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('007_create_inboxes_table');
+
+-- ============================================================================
+-- Migration 008: Messages Table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `messages` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `inbox_id` INT UNSIGNED NOT NULL,
+    `message_id` VARCHAR(255) NULL,
+    `from_address` VARCHAR(255) NOT NULL,
+    `from_name` VARCHAR(255) NULL,
+    `subject` VARCHAR(998) NULL,
+    `body_text` MEDIUMTEXT NULL,
+    `body_html` MEDIUMTEXT NULL,
+    `received_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+
+    PRIMARY KEY (`id`),
+    INDEX `idx_messages_inbox_id` (`inbox_id`),
+    INDEX `idx_messages_deleted_at` (`deleted_at`),
+    INDEX `idx_messages_received_at` (`received_at`),
+    INDEX `idx_messages_inbox_received` (`inbox_id`, `received_at`),
+    INDEX `idx_messages_inbox_deleted` (`inbox_id`, `deleted_at`),
+
+    CONSTRAINT `fk_messages_inbox_id`
+        FOREIGN KEY (`inbox_id`)
+        REFERENCES `inboxes` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('008_create_messages_table');
+
+-- ============================================================================
+-- Migration 009: Inbox Address Cooldowns Table
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `inbox_address_cooldowns` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `email_local_part` VARCHAR(64) NOT NULL,
+    `email_domain` VARCHAR(255) NOT NULL,
+    `last_used_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `cooldown_until` TIMESTAMP NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `idx_cooldowns_email` (`email_local_part`, `email_domain`),
+    INDEX `idx_cooldowns_cooldown_until` (`cooldown_until`),
+    INDEX `idx_cooldowns_last_used` (`last_used_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('009_create_inbox_address_cooldowns_table');
+
+-- ============================================================================
 -- Migration Complete
 -- ============================================================================
 
