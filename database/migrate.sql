@@ -251,6 +251,15 @@ CREATE TABLE IF NOT EXISTS `inbox_address_cooldowns` (
 INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('009_create_inbox_address_cooldowns_table');
 
 -- ============================================================================
+-- Migration 010: Cleanup Indexes
+-- ============================================================================
+
+-- Composite index for cleanup queries on status + updated_at
+CREATE INDEX `idx_inboxes_status_updated` ON `inboxes` (`status`, `updated_at`);
+
+INSERT IGNORE INTO `_migrations` (`migration`) VALUES ('010_add_cleanup_indexes');
+
+-- ============================================================================
 -- Migration Complete
 -- ============================================================================
 

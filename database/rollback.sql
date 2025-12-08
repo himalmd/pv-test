@@ -16,6 +16,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Drop tables in reverse dependency order
 -- ============================================================================
 
+-- Drop cleanup indexes (migration 010)
+DROP INDEX IF EXISTS `idx_inboxes_status_updated` ON `inboxes`;
+
 -- Drop messages table (depends on inboxes)
 DROP TABLE IF EXISTS `messages`;
 
