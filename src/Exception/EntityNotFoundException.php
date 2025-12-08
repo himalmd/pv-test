@@ -59,4 +59,14 @@ class EntityNotFoundException extends Exception
     {
         return new self('Comment', $id);
     }
+
+    public static function inbox(int|string $id): self
+    {
+        return new self('Inbox', $id);
+    }
+
+    public static function message(int $id): self
+    {
+        return new self('Message', $id);
+    }
 }
