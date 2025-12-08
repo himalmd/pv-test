@@ -135,19 +135,21 @@ mysql -u test_user -p snaply_test < database/migrate.sql
 
 declare(strict_types=1);
 
-namespace Snaply\Tests\Unit\YourNamespace;
+namespace Snaply\Tests\Unit\Service;
 
 use PHPUnit\Framework\TestCase;
+use Snaply\Service\InboxService;
 
-class YourClassTest extends TestCase
+class ExampleServiceTest extends TestCase
 {
-    public function testYourMethod(): void
+    public function testExampleMethod(): void
     {
         // Arrange
-        $instance = new YourClass();
+        $service = $this->createMock(InboxService::class);
+        $service->method('someMethod')->willReturn('expected');
 
         // Act
-        $result = $instance->yourMethod();
+        $result = $service->someMethod();
 
         // Assert
         $this->assertSame('expected', $result);
@@ -161,20 +163,22 @@ class YourClassTest extends TestCase
 
 declare(strict_types=1);
 
-namespace Snaply\Tests\Feature\YourNamespace;
+namespace Snaply\Tests\Feature\Api;
 
 use PHPUnit\Framework\TestCase;
+use Snaply\Service\InboxService;
 
-class YourFeatureTest extends TestCase
+class ExampleFeatureTest extends TestCase
 {
     protected function setUp(): void
     {
-        // Set up test dependencies
+        // Set up test dependencies (mocked or real)
     }
 
     public function testFeatureScenario(): void
     {
         // Test complete end-to-end scenario
+        $this->assertTrue(true);
     }
 }
 ```
